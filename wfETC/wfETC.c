@@ -84,17 +84,17 @@ void wfETC1_ReadColor53( const wfETC1_Block* block, const uint32_t offset3, WF_R
 	// read the 5 bit color and expand to 8 bit
 	{
 		const uint32_t bitOffset = WF_ETC1_COLOR_OFFSET((offset3+3));
-		const int32_t color = block->baseColorsAndFlags & (0x1f<<bitOffset);
-		*dst5 = ( color | ((uint32_t)color>>5) ) >> (bitOffset-3); // cast to uint to avoid sign extension on big endian
+		const int32_t color = ( block->baseColorsAndFlags >> (bitOffset-3) ) & 0xf8;
+		*dst5 = color | (color>>5);
 	}
 
 	// read the 3 bit color and expand to 8 bit
 	{
 		const uint32_t bitOffset = WF_ETC1_COLOR_OFFSET(offset3);
-		int32_t color = wfETC1_Color3IdxLUT[ ( block->baseColorsAndFlags&(0x7<<bitOffset) ) >> bitOffset ];
-		color += *dst5>>3;
+		const int32_t offset = wfETC1_Color3IdxLUT[ ( block->baseColorsAndFlags >> bitOffset ) & 0x7 ];
+		int32_t color = (*dst5>>3) + offset;
 		color <<= 3;
-		color |= (color>>3) & 0x7;
+		color |= (color>>5) & 0x7;
 		*dst3 = color;
 	}
 }
@@ -136,7 +136,7 @@ void wfETC1_DecodeBlock( const void* src, WF_RESTRICT uint32_t* dst, const uint3
 
 	// build color tables
 	{
-		const int32_t* intensityTable[2] = // [blockIdx]
+		const int32_t* intensityTable[2] = // [sub-block]
 		{
 			wfETC_IntensityTables[ ( block->baseColorsAndFlags >> WF_ETC1_COLOR_OFFSET(37) ) & 0x7 ],
 			wfETC_IntensityTables[ ( block->baseColorsAndFlags >> WF_ETC1_COLOR_OFFSET(34) ) & 0x7 ]
