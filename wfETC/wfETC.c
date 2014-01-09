@@ -79,7 +79,7 @@ int32_t wfETC1_ReadColor4( const wfETC1_Block* block, const uint32_t offset )
 const int32_t wfETC1_Color3IdxLUT[] = { 0, 1, 2, 3, -4, -3, -2, -1 };
 
 WF_INLINE
-void wfETC1_ReadColor53( const wfETC1_Block* block, const uint32_t offset3, WF_RESTRICT int32_t* dst5, WF_RESTRICT int32_t* dst3 )
+void wfETC1_ReadColor53( const wfETC1_Block* block, const uint32_t offset3, int32_t* WF_RESTRICT dst5, int32_t* WF_RESTRICT dst3 )
 {
 	// read the 5 bit color and expand to 8 bit
 	{
@@ -109,7 +109,7 @@ int32_t wfETC1_ReadPixel( const wfETC1_Block* block, const uint32_t offset )
 	;
 }
 
-void wfETC1_DecodeBlock( const void* src, WF_RESTRICT uint32_t* dst, const uint32_t dstStride )
+void wfETC1_DecodeBlock( const void* src, uint32_t* WF_RESTRICT dst, const uint32_t dstStride )
 {
 	const wfETC1_Block* block = ( wfETC1_Block* )src;
 
