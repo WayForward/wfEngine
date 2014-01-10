@@ -109,9 +109,10 @@ int32_t wfETC1_ReadPixel( const wfETC1_Block* block, const uint32_t offset )
 	;
 }
 
-void wfETC1_DecodeBlock( const void* src, uint32_t* WF_RESTRICT dst, const uint32_t dstStride )
+void wfETC1_DecodeBlock( const void* WF_RESTRICT src, void* WF_RESTRICT pDst, const uint32_t dstStride )
 {
-	const wfETC1_Block* block = ( wfETC1_Block* )src;
+	const wfETC1_Block* WF_RESTRICT block = ( wfETC1_Block* )src;
+	int32_t* WF_RESTRICT dst = (int32_t*)pDst;
 
 	int32_t baseColors[2][3]; // [sub-block][r,g,b]
 	int32_t colors[2][4]; // [sub-block][colorIdx]
@@ -212,5 +213,24 @@ void wfETC1_DecodeBlock( const void* src, uint32_t* WF_RESTRICT dst, const uint3
 		dst[2] = colors[1][ wfETC1_ReadPixel( block, 11 ) ];
 		dst[3] = colors[1][ wfETC1_ReadPixel( block, 15 ) ];
 		//dst += dstStride;
+	}
+}
+
+void wfETC1_DecodeImage( const void* WF_RESTRICT pSrc, void* WF_RESTRICT pDst, const uint32_t width, const uint32_t height )
+{
+	const uint8_t* WF_RESTRICT src = (uint8_t*)pSrc;
+	uint8_t* WF_RESTRICT dst = (uint8_t*)pDst;
+	const uint32_t widthBlocks  = width/4;
+	const uint32_t heightBlocks = height/4;
+	uint32_t x, y;
+	for( y = 0; y != heightBlocks; ++y )
+	{
+		for( x = 0; x != widthBlocks; ++x )
+		{
+			wfETC1_DecodeBlock( src, dst, width );
+			src += 8;
+			dst += 16;
+		}
+		dst += width*4*3;
 	}
 }
